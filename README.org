@@ -1,3 +1,11 @@
 #+TITLE: GraphyDB
 
-GraphyDB is a graph database for Python. It's built on SQLite.
+~GraphyDB~ is a graph database for Python built on top of ~SQLite~.
+
+There are many cases where a graph structure is a better fit to a problem domain than a set of tables.
+~GraphyDB~ was designed to fill a niche where a flexible embedded graph database was needed
+for a moderate sized problem (~10,000 edges and nodes). ~GraphyDB~ is not designed to handle terrabytes
+of data, and has not been particularly optimised for speed.
+
+
+See [[https://aalexei.github.io/graphydb/][GraphyDB Docs]] for detailed documentation.
