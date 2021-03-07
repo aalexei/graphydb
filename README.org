@@ -1,0 +1,3 @@
+#+TITLE: GraphyDB
+
+GraphyDB is a graph database for Python. It's built on SQLite.

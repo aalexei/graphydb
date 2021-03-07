@@ -195,7 +195,7 @@ def conditionalyield(keys,A,B):
         
 def cleandata(fulldata):
     '''
-    Return dict without keys that start with underscore
+    Return dict without keys that start with underscore (which are treated as temporary local variables).
     '''
     data = {k:v for k,v in fulldata.items() if k[0] != '_'}    
     return data
@@ -1086,7 +1086,8 @@ class GraphyDBItem(MutableMapping):
             data['mtime'] = time.time()         
         
         self.data = data
-        ''' Straight python dictionary that holds all the data. Keys begining with an underscore will be ignored in saving. 
+        '''Straight python dictionary that holds all the data. Keys begining with an underscore ("_")
+        will be ignored when saving and can be used to store local temporary data.
         Modifying the data directly is not recommended as what's changed will not be recorded.'''    
         
         self.setChanged(changed)      
@@ -1104,6 +1105,9 @@ class GraphyDBItem(MutableMapping):
         return self.data['uid']
     
     def setChanged(self, changed):
+        '''
+        Mark all keys as having changed.
+        '''
         if changed:
             ## regard all keys as having changed
             self._changedkeys = set(self.keys())
@@ -1112,12 +1116,15 @@ class GraphyDBItem(MutableMapping):
             
     @property   
     def changed(self):
+        '''
+        Returns True is any key is marked as changed.
+        '''
         return len(self._changedkeys)>0
         
     @property
     def exists(self):
         '''
-        Property: return if item exists in the database.
+        Property: return True if item exists in the database otherwise False.
         '''
         cursor = self.graph.cursor()
         n = cursor.execute('SELECT COUNT(*) FROM {} WHERE uid = ?'.format(self._table), (self['uid'],)).fetchone()[0]
