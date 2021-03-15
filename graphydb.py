@@ -539,6 +539,7 @@ class Graph:
         cursor.execute('''
         DROP TABLE IF EXISTS changes;
         CREATE TABLE changes(id INTEGER PRIMARY KEY AUTOINCREMENT, change TEXT);
+        VACUUM;
         ''')        
     
     def lastchanges(self):
@@ -584,8 +585,12 @@ class Graph:
             change['+'] = cleandata(new.data)
         else:
             ## item internals have changed
+            d = diff(old.data, new.data, new._changedkeys)
+            if len(d) == 0:
+                return
+            
             change['uid'] = new['uid']
-            change.update(diff(old.data, new.data, new._changedkeys))
+            change.update(d)
         
         change.setdefault('time', time.time())
         change.setdefault('rev', generateUUID())
@@ -652,14 +657,14 @@ class Graph:
             ESTR = ",".join(edgefields)+",uid UNINDEXED"
             cursor.execute('CREATE VIRTUAL TABLE IF NOT EXISTS edgefts USING fts5({});'.format(ESTR))
         
-    def getsetting(self, key):
+    def getsetting(self, key, default=None):
         '''
         Read back a previously saved setting. Value will be de-jsonified.
         '''
         cursor=self.cursor()
         row = cursor.execute('SELECT value FROM settings WHERE key = ?',[key]).fetchone()
         if row is None:
-            raise KeyError
+            return default
         
         value = json.loads(row[0])
         return value
@@ -1221,6 +1226,14 @@ class GraphyDBItem(MutableMapping):
             self['mtime'] = time.time()
         self._changedkeys.add(key)
     
+    def discard(self, key):
+        '''
+        Remove key if present
+        '''
+        if key in self.data:
+            del self[key]
+        return self
+    
     def deletefts(self):
         '''
         Remove the FTS data for this item.
@@ -1244,7 +1257,7 @@ class GraphyDBItem(MutableMapping):
     def __repr__(self): 
         return repr(self.data)
     
-    def copy(self):
+    def copy(self, newuid=False):
         data = self.data
         try:
             self.data = {}
@@ -1253,9 +1266,11 @@ class GraphyDBItem(MutableMapping):
             self.data = data
         c.update(self)
         c._changedkeys = set(self._changedkeys)
+        if newuid:
+            c['uid'] = generateUUID()
         return c
     
-    def deepcopy(self):
+    def deepcopy(self, newuid=False):
         data = self.data
         try:
             self.data = {}
@@ -1263,6 +1278,8 @@ class GraphyDBItem(MutableMapping):
         finally:
             self.data = data
         c.data = copy.deepcopy(data)
+        if newuid:
+            c['uid'] = generateUUID()
         return c        
     
     @classmethod
