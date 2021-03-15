@@ -1306,7 +1306,7 @@ class Node(GraphyDBItem):
             raise GraphyDBException("Must supply Node kind")        
         super().__init__(data, graph=graph, changed=changed)
         
-    def save(self, force=False, batch=None, setchange=True):
+    def save(self, force=False, batch=None, setchange=False):
         '''
         Save the data to the database. Any keys that begin with "_" will *not* be saved.
         
@@ -1422,7 +1422,7 @@ class Node(GraphyDBItem):
             ## union of sets
             return inn | outn         
             
-    def delete(self, disconnect=False, batch=None, setchange=True):
+    def delete(self, disconnect=False, batch=None, setchange=False):
         '''
         Delete this node from the database.
         
@@ -1477,7 +1477,7 @@ class Edge(GraphyDBItem):
 
         super().__init__(data, graph=graph, changed=changed)
         
-    def save(self, force=False, batch=None, setchange=True):
+    def save(self, force=False, batch=None, setchange=False):
         '''
         Save the data to the database. Any keys that begin with "_" will *not* be saved.
         
@@ -1509,7 +1509,7 @@ class Edge(GraphyDBItem):
         return self
 
             
-    def delete(self, setchange=True, batch=None):
+    def delete(self, setchange=False, batch=None):
         '''
         Delete edge from database.
         '''
@@ -1558,7 +1558,7 @@ class GraphyDBItemSet(IndexedSet):
             item.setGraph(graph, changed)
         return self
     
-    def save(self, force=False, batch=None, setchange=True):
+    def save(self, force=False, batch=None, setchange=False):
         '''
         Save all items to the database.
         
@@ -1690,7 +1690,7 @@ class ESet(GraphyDBItemSet):
             out.add(e.start)
         return out
 
-    def delete(self, batch=None, setchange=True):
+    def delete(self, batch=None, setchange=False):
         '''
         Delete the items from the *database*.
         N.B. don't confuse with remove() and discard() which work only on the set!
@@ -1771,7 +1771,7 @@ class NSet(GraphyDBItemSet):
             out.update(v.bothN(**copy.deepcopy(args)))
         return out    
     
-    def delete(self, disconnect=False, batch=None, setchange=True):
+    def delete(self, disconnect=False, batch=None, setchange=False):
         '''
         Delete the items from the *database*.
         N.B. don't confuse with remove() and discard() which work only on the set!
